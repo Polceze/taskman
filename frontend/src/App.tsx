@@ -35,43 +35,59 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-canvas">
-      <Toaster position="top-right" />
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: "13px",
+            borderRadius: "10px",
+            border: "1px solid #E5E5E3",
+          },
+        }}
+      />
 
-      {/* Header with create button */}
-      <header className="border-b border-border bg-surface">
+      {/* Header */}
+      <header className="sticky top-0 z-40 border-b border-border bg-canvas/80 backdrop-blur-md">
         <div className="mx-auto max-w-3xl px-4 py-4 flex items-center justify-between">
           <div>
-            <h1 className="text-base font-semibold text-ink">
-              Task Manager
+            <h1 className="text-base font-semibold tracking-tight text-ink">
+              TaskMan
             </h1>
             <p className="text-xs text-subtle">
-              {total} total tasks
+              {total} task{total !== 1 ? "s" : ""}
             </p>
           </div>
           <button
-            className="px-3 py-1.5 bg-accent text-white rounded-md text-sm"
+            className="btn-primary"
             onClick={() => setShowCreateModal(true)}
           >
-            + New task
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path
+                d="M6 1v10M1 6h10"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+            </svg>
+            New task
           </button>
         </div>
       </header>
 
       {/* Stats bar */}
-      <div className="border-b border-border bg-surface/80">
+      <div className="border-b border-border bg-surface">
         <div className="mx-auto max-w-3xl px-4 py-3 grid grid-cols-3 gap-3">
-          <div className="text-center">
-            <p className="text-lg font-semibold text-amber-600">{counts.pending}</p>
-            <p className="text-xs text-subtle">Pending</p>
-          </div>
-          <div className="text-center">
-            <p className="text-lg font-semibold text-blue-600">{counts.in_progress}</p>
-            <p className="text-xs text-subtle">In Progress</p>
-          </div>
-          <div className="text-center">
-            <p className="text-lg font-semibold text-emerald-600">{counts.completed}</p>
-            <p className="text-xs text-subtle">Completed</p>
-          </div>
+          {[
+            { label: "Pending", count: counts.pending, color: "text-amber-600" },
+            { label: "In Progress", count: counts.in_progress, color: "text-blue-600" },
+            { label: "Completed", count: counts.completed, color: "text-emerald-600" },
+          ].map((s) => (
+            <div key={s.label} className="text-center">
+              <p className={`text-xl font-semibold ${s.color}`}>{s.count}</p>
+              <p className="text-xs text-subtle">{s.label}</p>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -83,9 +99,9 @@ export default function App() {
             <button
               key={f.value}
               onClick={() => setStatusFilter(f.value)}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium ${
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150 ${
                 statusFilter === f.value
-                  ? "bg-accent text-white"
+                  ? "bg-accent text-white shadow-sm"
                   : "text-subtle hover:text-ink"
               }`}
             >
@@ -96,12 +112,16 @@ export default function App() {
 
         {/* Task list */}
         {loading ? (
-          <div className="text-center py-20 text-subtle">
-            Loading tasks...
+          <div className="flex items-center justify-center py-20 text-subtle">
+            <span className="h-5 w-5 border-2 border-border border-t-accent rounded-full animate-spin mr-3" />
+            Loading tasks…
           </div>
         ) : error ? (
           <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
-            <p className="text-sm text-red-700">Error: {error}</p>
+            <p className="text-sm font-medium text-red-700">
+              Could not load tasks
+            </p>
+            <p className="text-xs text-red-500 mt-1">{error}</p>
           </div>
         ) : visibleTasks.length === 0 ? (
           <div className="text-center py-20">
@@ -113,13 +133,17 @@ export default function App() {
           </div>
         ) : (
           <div className="space-y-3">
-            {visibleTasks.map((task) => (
-              <TaskCard
+            {visibleTasks.map((task, i) => (
+              <div
                 key={task.id}
-                task={task}
-                onEdit={(t) => setEditingTask(t)}
-                onDelete={(t) => deleteTask(t.id)}
-              />
+                style={{ animationDelay: `${i * 40}ms` }}
+              >
+                <TaskCard
+                  task={task}
+                  onEdit={(t) => setEditingTask(t)}
+                  onDelete={(t) => deleteTask(t.id)}
+                />
+              </div>
             ))}
           </div>
         )}

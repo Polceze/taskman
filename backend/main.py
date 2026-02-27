@@ -45,3 +45,8 @@ def root():
         "docs": "/docs",
     }
 
+
+@app.get("/health", tags=["Health"])
+def health():
+    """Liveness probe for container orchestration."""
+    return {"status": "ok"}

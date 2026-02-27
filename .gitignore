@@ -6,17 +6,47 @@ __pycache__/
 venv/
 *.egg-info/
 dist/
+backend/__pycache__/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Alembic
+alembic/versions/*.pyc
+!alembic/versions/001_initial.py
+
+# Environment
 .env
+.env.local
+.env.production
+.env.development
+*.env
 
 # Node
 node_modules/
-dist/
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.cache/
 .DS_Store
 
 # Docker
 *.log
+.dockerignore
 
 # IDE
 .vscode/
 .idea/
 *.swp
+*.swo
+
+# SSH Keys
+key
+key.pub
+*.pem
+*.key
+*.pub
+id_rsa
+id_rsa.pub

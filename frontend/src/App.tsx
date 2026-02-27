@@ -142,6 +142,7 @@ export default function App() {
                   task={task}
                   onEdit={(t) => setEditingTask(t)}
                   onDelete={(t) => deleteTask(t.id)}
+                  onStatusChange={(t, status) => updateTask(t.id, { status })}
                 />
               </div>
             ))}

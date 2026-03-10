@@ -21,7 +21,7 @@ client.interceptors.response.use(
     // No response at all = network/connectivity problem
     if (!err.response) {
       return Promise.reject(
-        new Error("Unable to reach the server. Backend may have spun down. Try again in a moment.")
+        new Error("Server may have spun down. Try again in a moment.")
       );
     }
     // Server responded with an error — use its detail message if available

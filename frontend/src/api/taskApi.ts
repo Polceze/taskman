@@ -14,12 +14,19 @@ const client = axios.create({
   timeout: 10_000,
 });
 
-// Response interceptor with meaningful error messages
+// Response interceptor — surface meaningful error messages
 client.interceptors.response.use(
   (res) => res,
   (err) => {
+    // No response at all = network/connectivity problem
+    if (!err.response) {
+      return Promise.reject(
+        new Error("Unable to reach the server. Backend may have spun down. Try again in a moment.")
+      );
+    }
+    // Server responded with an error — use its detail message if available
     const message =
-      err.response?.data?.detail ?? err.message ?? "An unexpected error occurred";
+      err.response?.data?.detail ?? "An unexpected error occurred. Please try again.";
     return Promise.reject(new Error(String(message)));
   }
 );

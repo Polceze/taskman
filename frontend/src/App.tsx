@@ -14,7 +14,7 @@ const STATUS_FILTERS: { value: TaskStatus | "all"; label: string }[] = [
 ];
 
 export default function App() {
-  const { tasks, total, loading, error, createTask, updateTask, deleteTask } =
+  const { tasks, total, loading, error, refetch, createTask, updateTask, deleteTask } =
     useTasks();
 
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -52,7 +52,7 @@ export default function App() {
         <div className="mx-auto max-w-3xl px-4 py-4 flex items-center justify-between">
           <div>
             <h1 className="text-base font-semibold tracking-tight text-ink">
-              TaskMan
+              TaskFlow
             </h1>
             <p className="text-xs text-subtle">
               {total} task{total !== 1 ? "s" : ""}
@@ -117,11 +117,28 @@ export default function App() {
             Loading tasks…
           </div>
         ) : error ? (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
-            <p className="text-sm font-medium text-red-700">
-              Could not load tasks
+          <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center">
+            <div className="flex justify-center mb-3">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" className="text-red-400">
+                <circle cx="16" cy="16" r="14" stroke="currentColor" strokeWidth="1.5" />
+                <path d="M16 9v8M16 21v1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </div>
+            <p className="text-sm font-semibold text-red-700 mb-1">
+              Something went wrong
             </p>
-            <p className="text-xs text-red-500 mt-1">{error}</p>
+            <p className="text-xs text-red-500 mb-4 max-w-xs mx-auto leading-relaxed">
+              {error}
+            </p>
+            <button
+              onClick={refetch}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-100 hover:bg-red-200 text-red-700 text-xs font-medium transition-colors"
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M1 6a5 5 0 1 0 1.5-3.5M1 2v2.5h2.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Try again
+            </button>
           </div>
         ) : visibleTasks.length === 0 ? (
           <div className="text-center py-20">

@@ -4,7 +4,8 @@ from contextlib import asynccontextmanager
 
 from config import settings
 from database import engine, Base
-from routes import router
+from routes import router as task_router
+from auth_routes import router as auth_router
 import models  # Ensure models are registered with Base
 
 
@@ -18,11 +19,11 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
-    description="A clean RESTful API for managing tasks — built with FastAPI & PostgreSQL.",
+    description="A secure RESTful API for managing tasks — built with FastAPI & PostgreSQL.",
     lifespan=lifespan,
 )
 
-# CORS — allow frontend development server and production origins
+# CORS — allow frontend origins
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.origins,
@@ -32,12 +33,12 @@ app.add_middleware(
 )
 
 # Register routes
-app.include_router(router)
+app.include_router(auth_router)
+app.include_router(task_router)
 
 
 @app.get("/", tags=["Health"])
 def root():
-    """Health check endpoint."""
     return {
         "service": settings.APP_NAME,
         "version": settings.APP_VERSION,
@@ -48,5 +49,4 @@ def root():
 
 @app.get("/health", tags=["Health"])
 def health():
-    """Liveness probe for container orchestration."""
     return {"status": "ok"}

@@ -1,7 +1,6 @@
 from pydantic_settings import BaseSettings
 from typing import List
 
-
 class Settings(BaseSettings):
     APP_NAME: str = "TaskMan API"
     APP_VERSION: str = "1.0.0"

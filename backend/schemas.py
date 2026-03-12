@@ -1,8 +1,49 @@
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, EmailStr, field_validator
 from datetime import datetime
 from typing import Optional
 from enum import Enum
 
+
+# --------- Auth schemas --------------
+
+class UserRegister(BaseModel):
+    """Schema for registering a new user."""
+    email: EmailStr
+    full_name: str = Field(..., min_length=2, max_length=255)
+    password: str = Field(..., min_length=8, description="Minimum 8 characters")
+
+    @field_validator("full_name")
+    @classmethod
+    def name_must_not_be_blank(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("Full name must not be blank")
+        return v.strip()
+
+
+class UserLogin(BaseModel):
+    """Schema for logging in."""
+    email: EmailStr
+    password: str
+
+
+class UserResponse(BaseModel):
+    """Public user data returned by the API — never includes password."""
+    id: int
+    email: str
+    full_name: str
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class TokenResponse(BaseModel):
+    """JWT token returned after successful login or registration."""
+    access_token: str
+    token_type: str = "bearer"
+    user: UserResponse
+
+
+# --------------- Task schemas --------------------------------
 
 class TaskStatus(str, Enum):
     """Allowed task status values."""

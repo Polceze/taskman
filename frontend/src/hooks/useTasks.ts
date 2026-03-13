@@ -3,13 +3,14 @@ import { taskApi } from "../api/taskApi";
 import type { Task, TaskCreatePayload, TaskUpdatePayload } from "../types/task";
 import toast from "react-hot-toast";
 
-export function useTasks() {
+export function useTasks(enabled: boolean = true) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchTasks = useCallback(async () => {
+    if (!enabled) return;
     setLoading(true);
     setError(null);
     try {
@@ -22,11 +23,17 @@ export function useTasks() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [enabled]);
 
   useEffect(() => {
-    fetchTasks();
-  }, [fetchTasks]);
+    if (enabled) fetchTasks();
+    else {
+      // Clear tasks when user logs out
+      setTasks([]);
+      setTotal(0);
+      setError(null);
+    }
+  }, [enabled, fetchTasks]);
 
   const createTask = async (payload: TaskCreatePayload): Promise<boolean> => {
     try {

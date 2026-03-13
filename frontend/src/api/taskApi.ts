@@ -14,6 +14,15 @@ const client = axios.create({
   timeout: 10_000,
 });
 
+// Request interceptor — attach JWT token from localStorage to every request
+client.interceptors.request.use((config) => {
+  const token = localStorage.getItem("access_token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 // Response interceptor — surface meaningful error messages
 client.interceptors.response.use(
   (res) => res,

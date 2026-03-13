@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Toaster } from "react-hot-toast";
 import { useTasks } from "./hooks/useTasks";
+import { useAuth } from "./hooks/useAuth";
 import { TaskCard } from "./components/TaskCard";
 import { TaskForm } from "./components/TaskForm";
 import { Modal } from "./components/Modal";
+import { AuthPage } from "./components/AuthPage";
 import type { Task, TaskStatus } from "./types/task";
 
 const STATUS_FILTERS: { value: TaskStatus | "all"; label: string }[] = [
@@ -14,14 +16,28 @@ const STATUS_FILTERS: { value: TaskStatus | "all"; label: string }[] = [
 ];
 
 export default function App() {
-  const { tasks, total, loading, error, refetch, createTask, updateTask, deleteTask } =
-    useTasks();
+  const { user, isAuthenticated, loading: authLoading, error: authError, login, register, logout } = useAuth();
+  const { tasks, total, loading, error, refetch, createTask, updateTask, deleteTask } = useTasks(isAuthenticated);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [statusFilter, setStatusFilter] = useState<TaskStatus | "all">("all");
 
-  // Filtered view
+  // Show auth page if not logged in
+  if (!isAuthenticated) {
+    return (
+      <>
+        <Toaster position="top-right" toastOptions={{ style: { fontFamily: "'DM Sans', sans-serif", fontSize: "13px", borderRadius: "10px", border: "1px solid #E5E5E3" } }} />
+        <AuthPage
+          onLogin={login}
+          onRegister={register}
+          loading={authLoading}
+          error={authError}
+        />
+      </>
+    );
+  }
+
   const visibleTasks =
     statusFilter === "all"
       ? tasks
@@ -51,27 +67,35 @@ export default function App() {
       <header className="sticky top-0 z-40 border-b border-border bg-canvas/80 backdrop-blur-md">
         <div className="mx-auto max-w-3xl px-4 py-4 flex items-center justify-between">
           <div>
-            <h1 className="text-base font-semibold tracking-tight text-ink">
-              TaskFlow
-            </h1>
-            <p className="text-xs text-subtle">
-              {total} task{total !== 1 ? "s" : ""}
-            </p>
+            <h1 className="text-base font-semibold tracking-tight text-ink">TaskMan</h1>
+            <p className="text-xs text-subtle">{total} task{total !== 1 ? "s" : ""}</p>
           </div>
-          <button
-            className="btn-primary"
-            onClick={() => setShowCreateModal(true)}
-          >
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path
-                d="M6 1v10M1 6h10"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-              />
-            </svg>
-            New task
-          </button>
+
+          <div className="flex items-center gap-3">
+            {/* User greeting */}
+            <span className="text-xs text-subtle hidden sm:block">
+              {user?.full_name}
+            </span>
+
+            {/* Logout button */}
+            <button
+              onClick={logout}
+              className="btn-ghost text-xs px-3 py-1.5"
+              title="Log out"
+            >
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <path d="M5 1H2a1 1 0 00-1 1v9a1 1 0 001 1h3M9 9.5l3-3-3-3M12 6.5H5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Log out
+            </button>
+
+            <button className="btn-primary" onClick={() => setShowCreateModal(true)}>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+              New task
+            </button>
+          </div>
         </div>
       </header>
 
@@ -124,12 +148,8 @@ export default function App() {
                 <path d="M16 9v8M16 21v1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
               </svg>
             </div>
-            <p className="text-sm font-semibold text-red-700 mb-1">
-              Something went wrong
-            </p>
-            <p className="text-xs text-red-500 mb-4 max-w-xs mx-auto leading-relaxed">
-              {error}
-            </p>
+            <p className="text-sm font-semibold text-red-700 mb-1">Something went wrong</p>
+            <p className="text-xs text-red-500 mb-4 max-w-xs mx-auto leading-relaxed">{error}</p>
             <button
               onClick={refetch}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-100 hover:bg-red-200 text-red-700 text-xs font-medium transition-colors"
@@ -151,10 +171,7 @@ export default function App() {
         ) : (
           <div className="space-y-3">
             {visibleTasks.map((task, i) => (
-              <div
-                key={task.id}
-                style={{ animationDelay: `${i * 40}ms` }}
-              >
+              <div key={task.id} style={{ animationDelay: `${i * 40}ms` }}>
                 <TaskCard
                   task={task}
                   onEdit={(t) => setEditingTask(t)}

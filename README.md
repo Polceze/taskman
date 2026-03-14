@@ -1,6 +1,6 @@
 # TaskMan — Task Management System
 
-A full-stack task management web application built to explore modern architecture and design patterns, with a focus on scalability and user experience.
+A simple full-stack task management web application built to explore modern architecture and design patterns, with a focus on scalability and user experience.
 
 
 ## Tech Stack
@@ -11,7 +11,7 @@ A full-stack task management web application built to explore modern architectur
 | ORM       | **SQLAlchemy 2** + **Alembic**      | Robust ORM with proper migration management      |
 | Database  | **PostgreSQL 16**                   | Production-grade relational DB                   |
 | Auth      | **passlib/bcrypt + python-jose**    | Password hashing and JWT session management      |
-| Frontend  | **React 18** + **Vite** + **TypeScript** | Fast, type-safe, matches job spec             |
+| Frontend  | **React 18** + **Vite** + **TypeScript** | Fast, type-safe             |
 | Styling   | **Tailwind CSS v3**                 | Utility-first, clean minimal design              |
 | Container | **Docker** + **Docker Compose**     | One-command setup, production-ready              |
 

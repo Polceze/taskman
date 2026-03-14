@@ -1,8 +1,7 @@
 # TaskMan — Task Management System
 
-A full-stack task management web application built as a practical assignment for the CHQI Software Developer position. Demonstrates clean architecture, production-grade patterns, and a polished user experience.
+A full-stack task management web application built to explore modern architecture and design patterns, with a focus on scalability and user experience.
 
----
 
 ## Tech Stack
 
@@ -11,11 +10,11 @@ A full-stack task management web application built as a practical assignment for
 | Backend   | **FastAPI** (Python 3.12)           | Modern async framework, auto-generates Swagger docs, excellent DX |
 | ORM       | **SQLAlchemy 2** + **Alembic**      | Robust ORM with proper migration management      |
 | Database  | **PostgreSQL 16**                   | Production-grade relational DB                   |
+| Auth      | **passlib/bcrypt + python-jose**    | Password hashing and JWT session management      |
 | Frontend  | **React 18** + **Vite** + **TypeScript** | Fast, type-safe, matches job spec             |
 | Styling   | **Tailwind CSS v3**                 | Utility-first, clean minimal design              |
 | Container | **Docker** + **Docker Compose**     | One-command setup, production-ready              |
 
----
 
 ## Project Structure
 
@@ -45,7 +44,6 @@ taskman/
 └── README.md
 ```
 
----
 
 ## Running with Docker (Recommended)
 
@@ -68,7 +66,6 @@ docker compose up --build
 To stop: `docker compose down`  
 To reset the database: `docker compose down -v`
 
----
 
 ## Running Locally (Without Docker)
 
@@ -117,18 +114,30 @@ npm run dev
 
 Frontend is now available at `http://localhost:3000`
 
----
 
 ## API Endpoints
 
-| Method   | Endpoint            | Description          |
-|----------|---------------------|----------------------|
-| `POST`   | `/api/tasks`        | Create a task        |
-| `GET`    | `/api/tasks`        | List all tasks       |
-| `GET`    | `/api/tasks/{id}`   | Get a single task    |
-| `PUT`    | `/api/tasks/{id}`   | Update a task        |
-| `DELETE` | `/api/tasks/{id}`   | Delete a task        |
-| `GET`    | `/health`           | Health check         |
+| Method | Endpoint | Description | Auth required |
+|---|---|---|---|
+| `POST`   | `/api/auth/register` | Create a new account | No |
+| `POST`   | `/api/auth/login` | Log in and receive a token | No |
+| `GET`    | `/api/auth/me`    | Get current user profile | Yes |
+| `POST`   | `/api/tasks`        | Create a task        | Yes |
+| `GET`    | `/api/tasks`        | List all tasks       | Yes |
+| `GET`    | `/api/tasks/{id}`   | Get a single task    | Yes |
+| `PUT`    | `/api/tasks/{id}`   | Update a task        | Yes |
+| `DELETE` | `/api/tasks/{id}`   | Delete a task        | Yes |
+| `GET`    | `/health`           | Health check         | No |
+
+All task endpoints require a valid JWT token in the `Authorization: Bearer <token>` header.
+
+Tokens expire after **24 hours**. The `SECRET_KEY` used to sign tokens must be set
+as an environment variable — the app will refuse to start without it.
+
+Generate a secure key with:
+```bash
+python -c "import secrets; print(secrets.token_hex(32))"
+```
 
 ### Task Status Values
 - `pending` — not yet started
@@ -146,8 +155,6 @@ curl -X POST http://localhost:8000/api/tasks \
     "due_date": "2025-06-30T00:00:00Z"
   }'
 ```
-
----
 
 ## Database Schema
 
@@ -172,18 +179,26 @@ alembic revision --autogenerate -m "describe your change"
 alembic upgrade head
 ```
 
----
-
 ## Design Decisions
 
-- **Layered architecture** — routes → crud → models, keeping concerns separated and testable
-- **Pydantic validation** — all input validated at the schema layer before touching the DB
-- **Partial updates** — `PUT` uses `exclude_unset=True` so only provided fields are updated
-- **Error handling** — 404s, validation errors, and unexpected exceptions all return structured JSON
-- **CORS** — configured via environment variable, not hardcoded
-- **Docker health checks** — backend waits for PostgreSQL to be ready before starting
+- **Layered architecture: -** routes → crud → models, keeping concerns separated and testable
+- **Pydantic validation: -** all input is validated at the schema layer before touching the DB
+- **Partial updates: -** `PUT` uses `exclude_unset=True` so only provided fields are updated
+- **Error handling: -** 404s, validation errors, and unexpected exceptions all return structured JSON
+- **Docker health checks: -** backend waits for PostgreSQL to be ready before starting
+
+## Security
+- **Authentication: -** JWT-based auth with bcrypt password hashing. 
+  Token signing key is required via environment variable, & no insecure default exists.
+- **Data isolation: -** all task queries are scoped by `user_id`, 
+  so users can only ever see and modify their own data.
+- **CORS: -** configured via environment variable, not hardcoded.
+- **Secrets: -** credentials and the JWT secret live in `.env`, 
+  which is excluded from version control via `.gitignore`.
 
 ---
+---
+
 
 
 

@@ -14,7 +14,7 @@ client.interceptors.response.use(
   (err) => {
     if (!err.response) {
       return Promise.reject(
-        new Error("Unable to reach the server. Please try again.")
+        new Error("Server may have spun down. Give it a minute then try again.")
       );
     }
     const message = err.response?.data?.detail ?? "An unexpected error occurred.";
